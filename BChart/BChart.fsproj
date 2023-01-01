@@ -1,12 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="StackedAreaTimeSeriesChart.fs" />
+    <Compile Include="StackedBarTimeSeriesChart.fs" />
+    <Compile Include="DonutDoubleChart.fs" />
     <Compile Include="Library.fs" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Feliz" Version="2.3.0" />
+  </ItemGroup>
 
+  <PropertyGroup>
+    <NpmDependencies>
+      <NpmPackage Name="@visx/text" Version="2.12.2" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/shape" Version="2.12.2" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/scale" Version="2.2.2" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/mock-data" Version="2.15.1" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/grid" Version="2.6.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/group" Version="2.10.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/gradient" Version="2.1.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/axis" Version="2.6.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/event" Version="2.6.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/curve" Version="2.1.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/responsive" Version="2.8.0" ResolutionStrategy="max" />
+      <NpmPackage Name="@visx/tooltip" Version="2.8.0" ResolutionStrategy="max" />
+      <NpmPackage Name="react-spring" Version="8.0.27" ResolutionStrategy="max" />
+      <NpmPackage Name="dayjs" Version="1.11.6" ResolutionStrategy="max" />
+      <NpmPackage Name="d3" Version="7.7.0" ResolutionStrategy="max" />
+      <NpmPackage Name="d3-array" Version="3.2.1" ResolutionStrategy="max" />
+      <NpmPackage Name="@emotion/styled" Version="11.8.1" ResolutionStrategy="max" />
+    </NpmDependencies>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Content Include="*.ts; *.tsx; *.fsproj; *.fs; *.js;" Exclude="**\*.fs.js" PackagePath="fable\" />
+  </ItemGroup>
+  
 </Project>
