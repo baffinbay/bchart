@@ -1,24 +1,18 @@
-import {React, ReactElement, useCallback} from 'react'
+import React, { ReactElement, useCallback } from 'react'
 import styled from '@emotion/styled/macro'
-import dayjs, {Dayjs} from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import duration, {Duration} from 'dayjs/plugin/duration'
-import {BarStack} from '@visx/shape'
-import {scaleBand, scaleLinear, scaleOrdinal, scaleTime} from '@visx/scale'
-import {AxisBottom, AxisLeft} from '@visx/axis'
-import {Text} from '@visx/text'
-import {GridColumns} from '@visx/grid'
-import {useTooltip, TooltipWithBounds, defaultStyles} from '@visx/tooltip'
-import {Group} from '@visx/group'
-import {ParentSize} from '@visx/responsive'
-import {
-  orderKeysOnColor,
-  mapToEvenResolution as mapToEvenBucketBoundaries,
-  aggregateKeysAndDataByColor,
-  humanizeNumber,
-  IDatum
-} from './utils'
-import {localPoint} from '@visx/event'
+import duration, { Duration } from 'dayjs/plugin/duration'
+import { BarStack } from '@visx/shape'
+import { scaleBand, scaleLinear, scaleOrdinal, scaleTime } from '@visx/scale'
+import { AxisBottom, AxisLeft } from '@visx/axis'
+import { Text } from '@visx/text'
+import { GridColumns } from '@visx/grid'
+import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip'
+import { Group } from '@visx/group'
+import { ParentSize } from '@visx/responsive'
+import { humanizeNumber } from './utils'
+import { localPoint } from '@visx/event'
 
 dayjs.extend(utc)
 dayjs.extend(duration)
@@ -27,22 +21,28 @@ const MIN_BARS = 1
 const MAX_BARS = 300
 
 const barSizeOptions: Array<{ amount: number; unit: 'm' | 'h' }> = [
-  {amount: 1, unit: 'm'},
-  {amount: 2, unit: 'm'},
-  {amount: 5, unit: 'm'},
-  {amount: 10, unit: 'm'},
-  {amount: 15, unit: 'm'},
-  {amount: 30, unit: 'm'},
-  {amount: 1, unit: 'h'},
-  {amount: 2, unit: 'h'},
-  {amount: 3, unit: 'h'},
-  {amount: 6, unit: 'h'},
-  {amount: 12, unit: 'h'},
+  { amount: 1, unit: 'm' },
+  { amount: 2, unit: 'm' },
+  { amount: 5, unit: 'm' },
+  { amount: 10, unit: 'm' },
+  { amount: 15, unit: 'm' },
+  { amount: 30, unit: 'm' },
+  { amount: 1, unit: 'h' },
+  { amount: 2, unit: 'h' },
+  { amount: 3, unit: 'h' },
+  { amount: 6, unit: 'h' },
+  { amount: 12, unit: 'h' },
 ]
+
+export interface IDatum {
+  date: Dayjs
+
+  [propName: string]: number | Dayjs
+}
 
 type Props<T> = {
   id: string
-  data: T[] | undefined
+  data: T[]
   startDate: Dayjs
   endDate: Dayjs
   title?: string
@@ -67,17 +67,17 @@ type Props<T> = {
 /// StackedAreaChart component
 ///
 export default function StackedBarTimeSeriesChart<T extends IDatum>({
-                                                                      data,
-                                                                      title,
-                                                                      style,
-                                                                      timeZone = 'UTC',
-                                                                      startDate,
-                                                                      endDate,
-                                                                      tooltip,
-                                                                      leftYAxis = {enabled: true},
-                                                                      rightYAxis = {enabled: false},
-                                                                      settings,
-                                                                    }: Props<T>): ReactElement {
+  data,
+  title,
+  style,
+  timeZone = 'UTC',
+  startDate,
+  endDate,
+  tooltip,
+  leftYAxis = { enabled: true },
+  rightYAxis = { enabled: false },
+  settings,
+}: Props<T>): ReactElement {
   const keys = Object.keys(data[0] || []).filter((k) => k !== 'date')
   const orderedKeys = !!settings?.colorOrder
     ? (orderKeysOnColor(keys, settings) as (keyof T)[])
@@ -90,7 +90,7 @@ export default function StackedBarTimeSeriesChart<T extends IDatum>({
     left: leftYAxis.enabled ? 35 : 0,
   }
 
-  const adjustedData = mapToEvenBucketBoundaries<T>(
+  const adjustedData = mapToEvenResolution<T>(
     data,
     startDate,
     endDate,
@@ -100,9 +100,9 @@ export default function StackedBarTimeSeriesChart<T extends IDatum>({
   )
 
   return (
-    <Wrapper style={{...style, position: 'relative'}}>
+    <Wrapper style={{ ...style, position: 'relative' }}>
       <ParentSize>
-        {({width, height}) => (
+        {({ width, height }) => (
           <Graph
             width={width}
             height={height}
@@ -146,18 +146,18 @@ type GraphProps<T extends IDatum> = {
 }
 
 function Graph<T extends IDatum>({
-                                   width,
-                                   height,
-                                   margin,
-                                   data,
-                                   keys,
-                                   title,
-                                   timeZone,
-                                   tooltip,
-                                   leftYAxis = {enabled: true},
-                                   rightYAxis = {enabled: false},
-                                   settings,
-                                 }: GraphProps<T>) {
+  width,
+  height,
+  margin,
+  data,
+  keys,
+  title,
+  timeZone,
+  tooltip,
+  leftYAxis = { enabled: true },
+  rightYAxis = { enabled: false },
+  settings,
+}: GraphProps<T>) {
   const {
     tooltipData,
     tooltipLeft,
@@ -212,7 +212,7 @@ function Graph<T extends IDatum>({
       ? dayjs.duration(dayjs(data[1].date).diff(dayjs(data[0].date)))
       : dayjs.duration(1, 'm')
 
-  const {keys: colorKeys, data: dataByColor} = aggregateKeysAndDataByColor<T>(
+  const { keys: colorKeys, data: dataByColor } = aggregateKeysAndDataByColor<T>(
     keys,
     data,
     settings
@@ -230,7 +230,7 @@ function Graph<T extends IDatum>({
         | React.MouseEvent<SVGRectElement>,
       barIndex: number
     ) => {
-      const {x} = localPoint(event) || {x: 0}
+      const { x } = localPoint(event) || { x: 0 }
       if (
         keys.reduce(
           (sum: number, k) => (data[barIndex][k] as number) + sum,
@@ -299,7 +299,7 @@ function Graph<T extends IDatum>({
   return (
     <>
       <svg width={'100%'} height={height}>
-        <rect x={0} y={0} width={width} height={height} fill="#fff"/>
+        <rect x={0} y={0} width={width} height={height} fill="#fff" />
         <Text
           width={width}
           verticalAnchor="start"
@@ -485,3 +485,185 @@ const Rect = styled.rect`
     opacity: 0.1;
   }
 `
+
+// Copied from utils
+
+function intervalConverterFactory(
+  barSizeOptions: Array<{ amount: number; unit: 'm' | 'h' }>
+) {
+  return barSizeOptions.map(({ unit, amount }) => ({
+    unit: unit,
+    duration: dayjs.duration(amount, unit),
+    startOfInterval: (d: Dayjs) => {
+      return d.startOf(unit).subtract(d.get(unit) % amount, unit)
+    },
+    endOfInterval: (d: Dayjs) => {
+      const roundedTimestamp = d
+        .startOf(unit)
+        .add((amount - (d.get(unit) % amount)) % amount, unit)
+      if (roundedTimestamp.isBefore(d)) {
+        return roundedTimestamp.add(amount, unit)
+      }
+      return roundedTimestamp
+    },
+  }))
+}
+
+export function mapToEvenResolution<T extends IDatum>(
+  data: T[],
+  startDate: Dayjs,
+  endDate: Dayjs,
+  barSizeOptions: Array<{ amount: number; unit: 'm' | 'h' }>,
+  minBars: number,
+  maxBars: number
+): T[] {
+  const intervalConverters = intervalConverterFactory(barSizeOptions)
+  const intervalSettings = intervalConverters
+    .map((x) => {
+      const intervalStart = x.startOfInterval(dayjs(startDate))
+      const intervalEnd = x.endOfInterval(dayjs(endDate))
+      const intervalLength = intervalEnd.diff(intervalStart, x.unit)
+      const numBars = intervalLength / x.duration.as(x.unit)
+      return {
+        unit: x.unit,
+        numBars: numBars,
+        barWidth: intervalLength / numBars,
+        intervalStart,
+      }
+    })
+    .find(({ numBars: bars }) => minBars <= bars && bars <= maxBars)
+
+  if (!intervalSettings) {
+    console.error(
+      'failed to generate interval settings given > ',
+      startDate,
+      endDate,
+      minBars,
+      maxBars
+    )
+    throw new Error('Did not find proper bar interval')
+  }
+
+  const keys = Object.keys(data[0] || []).filter(
+    (k) => k !== 'date'
+  ) as (keyof T)[]
+
+  const newData = new Array(intervalSettings.numBars).fill(0).map((_, i) => keys.reduce((zeroObj, k) => ({ ...zeroObj, [k]: 0 }), {
+    date: intervalSettings.intervalStart.add(
+      intervalSettings.barWidth * i,
+      intervalSettings.unit
+    ),
+  })
+  ) as unknown as T[]
+
+  return data.reduce((newData, d) => {
+    const index = Math.floor(
+      dayjs(d.date).diff(
+        intervalSettings.intervalStart,
+        intervalSettings.unit
+      ) / intervalSettings.barWidth
+    )
+
+    // exclude data outside of chart interval
+    if (!newData[index]) {
+      return newData
+    }
+
+    newData[index] = keys.reduce((newVal, k) => {
+      return { ...newVal, [k]: (newVal[k] as number) + (d[k] as number) }
+    }, newData[index])
+    return newData
+  }, newData)
+}
+
+export function orderKeysOnColor(
+  keys: string[],
+  settings: {
+    colorOrder?: string[]
+    categories?: {
+      key: string
+      strokeColor: string
+    }[]
+  }
+) {
+  const colorOrderMap =
+    settings.colorOrder?.reduce(
+      (map: { [key: string]: number }, x, i) => ({ ...map, [x]: i }),
+      {}
+    ) ?? {}
+
+  const keyToOrder =
+    settings.categories?.reduce(
+      (map: { [key: string]: number }, x) => ({
+        ...map,
+        [x.key]: colorOrderMap[x.strokeColor] ?? 0,
+      }),
+      {}
+    ) ?? {}
+
+  return keys
+    .sort((a, b) => {
+      if (!colorOrderMap) {
+        return 0
+      }
+      return (keyToOrder[a] ?? 0) - (keyToOrder[b] ?? 0)
+    })
+    .reverse()
+}
+
+export function aggregateKeysAndDataByColor<T extends IDatum>(
+  keys: (keyof T)[],
+  data: T[],
+  settings?: {
+    colorOrder?: string[]
+    categories?: {
+      key: string
+      strokeColor: string
+    }[]
+  }
+): { data: IDatum[]; keys: string[] } {
+  // properties with the same color is aggregated together. What the actual key is does not matter for the chart.
+  // Each key gets its own bar segment. Merging bar segments with the same color into one bar segment removes the issue
+  // where stripes appear where bar segments meet.
+  const colorGenerator = defaultColorGenerator()
+  const keysToColorKeys = keys.reduce((obj, x) => {
+    const category = settings?.categories?.find((y) => y.key === x)
+    if (category) {
+      return { ...obj, [x]: category.strokeColor }
+    } else {
+      return { ...obj, [x]: colorGenerator.next().value }
+    }
+  }, {}) as { [x: string]: string }
+
+  const colorKeys = [...new Set(Object.values(keysToColorKeys))]
+  const zeroPoint = [...new Set(Object.values(keysToColorKeys))].reduce(
+    (obj, k) => ({ ...obj, [k]: 0 }),
+    {}
+  ) as { [x: string]: number }
+
+  const dataByColor = data.map((x) => {
+    const newData = Object.entries(keysToColorKeys).reduce(
+      (dataByColor, [k, colorKey]) => {
+        return {
+          ...dataByColor,
+          [colorKey]: dataByColor[colorKey] + (x[k] as number),
+        }
+      },
+      zeroPoint
+    )
+
+    return { ...newData, date: x.date } as IDatum
+  })
+
+  return { keys: colorKeys, data: dataByColor }
+}
+
+function* defaultColorGenerator() {
+  while (true) {
+    yield 'rgb(32, 89, 140, 0.4)'
+    yield 'rgb(32, 89, 140, 0.8)'
+    yield 'rgb(32, 89, 140, 0.2)'
+    yield 'rgb(32, 89, 140, 1)'
+    yield 'rgb(32, 89, 140, 0.6)'
+  }
+}

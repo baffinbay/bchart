@@ -1,21 +1,21 @@
-import {React, ReactElement, useCallback} from 'react'
+import React, { ReactElement, useCallback } from 'react'
 import styled from '@emotion/styled/macro'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import {Text} from '@visx/text'
-import {AreaStack, Bar, Line} from '@visx/shape'
-import {GridColumns} from '@visx/grid'
-import {curveMonotoneX} from '@visx/curve'
-import {SeriesPoint} from '@visx/shape/lib/types'
-import {LinearGradient} from '@visx/gradient'
-import {AxisBottom, AxisLeft} from '@visx/axis'
-import {Group} from '@visx/group'
-import {scaleTime, scaleLinear} from '@visx/scale'
-import {ParentSize} from '@visx/responsive'
-import {useTooltip, TooltipWithBounds, defaultStyles} from '@visx/tooltip'
-import {localPoint} from '@visx/event'
-import {bisector} from 'd3-array'
-import {IDatum, humanizeNumber} from './utils'
+import { Text } from '@visx/text'
+import { AreaStack, Bar, Line } from '@visx/shape'
+import { GridColumns } from '@visx/grid'
+import { curveMonotoneX } from '@visx/curve'
+import { SeriesPoint } from '@visx/shape/lib/types'
+import { LinearGradient } from '@visx/gradient'
+import { AxisBottom, AxisLeft } from '@visx/axis'
+import { Group } from '@visx/group'
+import { scaleTime, scaleLinear } from '@visx/scale'
+import { ParentSize } from '@visx/responsive'
+import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip'
+import { localPoint } from '@visx/event'
+import { bisector } from 'd3-array'
+import { humanizeNumber } from './utils'
 
 dayjs.extend(utc)
 
@@ -24,9 +24,15 @@ type Gradient = {
   to: string
 }
 
+export interface IDatum {
+  date: Date
+
+  [propName: string]: number | Date
+}
+
 type Props<T> = {
   id: string
-  data: T[] | undefined
+  data: T[]
   title: string
   tooltip?(data: T | undefined): ReactElement
   unit: string
@@ -43,23 +49,24 @@ type Props<T> = {
 /// StackedAreaChart component
 ///
 export default function StackedAreaChart<T extends IDatum>({
-                                                             id,
-                                                             data,
-                                                             title,
-                                                             tooltip,
-                                                             unit,
-                                                             settings,
-                                                             style,
-                                                             timeZone = 'UTC',
-                                                           }: Props<T>): ReactElement {
+  id,
+  data,
+  title,
+  tooltip,
+  unit,
+  settings,
+  style,
+  timeZone = 'UTC',
+}: Props<T>): ReactElement {
+
   const keys = Object.keys(data[0] || []).filter(
     (k) => k !== 'date'
   ) as (keyof T)[]
 
   return (
-    <Wrapper style={{...style, position: 'relative'}}>
+    <Wrapper style={{ ...style, position: 'relative' }}>
       <ParentSize>
-        {({width, height}) => (
+        {({ width, height }) => (
           <Graph
             id={id}
             width={width}
@@ -97,18 +104,18 @@ type GraphProps<T extends IDatum> = {
 }
 
 function Graph<T extends IDatum>({
-                                   id,
-                                   width,
-                                   height,
-                                   margin = {top: 36, right: 35, bottom: 22, left: 35},
-                                   data,
-                                   title,
-                                   unit,
-                                   settings,
-                                   keys,
-                                   timeZone,
-                                   tooltip,
-                                 }: GraphProps<T>) {
+  id,
+  width,
+  height,
+  margin = { top: 36, right: 35, bottom: 22, left: 35 },
+  data,
+  title,
+  unit,
+  settings,
+  keys,
+  timeZone,
+  tooltip,
+}: GraphProps<T>) {
   const {
     tooltipData,
     tooltipLeft,
@@ -155,7 +162,7 @@ function Graph<T extends IDatum>({
     (
       event: React.TouchEvent<SVGRectElement> | React.MouseEvent<SVGRectElement>
     ) => {
-      const {x} = localPoint(event) || {x: 0}
+      const { x } = localPoint(event) || { x: 0 }
       const xx = x - margin.left
       const x0 = xScale.invert(xx)
       const index = bisectDate(data, x0, 1)
@@ -179,7 +186,7 @@ function Graph<T extends IDatum>({
   return width < 10 ? null : (
     <>
       <svg width={'100%'} height={height}>
-        <rect x={0} y={0} width={width} height={height} fill="#fff"/>
+        <rect x={0} y={0} width={width} height={height} fill="#fff" />
         <Text
           width={width}
           verticalAnchor="start"
@@ -213,7 +220,7 @@ function Graph<T extends IDatum>({
             y1={(d) => yScale(getY1(d)) ?? 0}
             curve={curveMonotoneX}
           >
-            {({stacks, path}) =>
+            {({ stacks, path }) =>
               stacks
                 .map((stack) => {
                   const strokeColor =
@@ -340,8 +347,8 @@ function Graph<T extends IDatum>({
         {tooltipOpen && (
           <g>
             <Line
-              from={{x: tooltipLeft, y: margin.top}}
-              to={{x: tooltipLeft, y: yMax + margin.top}}
+              from={{ x: tooltipLeft, y: margin.top }}
+              to={{ x: tooltipLeft, y: yMax + margin.top }}
               stroke="#999"
               strokeWidth={1}
               pointerEvents="none"

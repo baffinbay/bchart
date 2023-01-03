@@ -1,14 +1,14 @@
-import {React, ReactElement} from 'react'
+import React, { ReactElement } from 'react'
 import styled from '@emotion/styled/macro'
-import {ParentSize} from '@visx/responsive'
-import Pie, {ProvidedProps, PieArcDatum} from '@visx/shape/lib/shapes/Pie'
-import {useTooltip, TooltipWithBounds, defaultStyles} from '@visx/tooltip'
-import {localPoint} from '@visx/event'
-import {animated, useTransition, interpolate} from 'react-spring'
-import {Group} from '@visx/group'
-import {humanizeNumber, merge} from './utils'
+import { ParentSize } from '@visx/responsive'
+import Pie, { ProvidedProps, PieArcDatum } from '@visx/shape/lib/shapes/Pie'
+import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip'
+import { localPoint } from '@visx/event'
+import { animated, useTransition, interpolate } from 'react-spring'
+import { Group } from '@visx/group'
+import { humanizeNumber } from './utils'
 
-const defaultMargin = {top: 10, right: 10, bottom: 10, left: 10}
+const defaultMargin = { top: 10, right: 10, bottom: 10, left: 10 }
 
 export interface getColor {
   inner: (label: string) => string
@@ -19,10 +19,9 @@ type Props = {
   title?: string
   getColor: getColor
   data:
-    | Map<string, Map<string, number>>
-    | Map<string, number>
-    | [Map<string, number>, Map<string, number>, number]
-    | undefined
+  | Map<string, Map<string, number>>
+  | Map<string, number>
+  | [Map<string, number>, Map<string, number>, number]
   unit: string
   tooltipOuter?: (name: string, qty: number, share: number) => ReactElement
   // tooltipInner?: (name: string, qty: number, share: number) => ReactElement
@@ -40,6 +39,18 @@ const sumByOuterMapKeys = (
 
 const mapToArrayOfEntries = (x: Map<string, number>): [string, number][] =>
   Array.from(x.entries())
+
+export function merge(
+  mapOne: Map<string, number>,
+  mapTwo: Map<string, number>
+): Map<string, number> {
+  return new Map<string, number>(
+    Array.from(new Map([...mapOne, ...mapTwo]).keys()).map((key) => [
+      key,
+      (mapOne.get(key) ?? 0) + (mapTwo.get(key) ?? 0),
+    ])
+  )
+}
 
 /// sums the value of all the inner slices
 const sumByInnerMapKeys = (
@@ -125,19 +136,20 @@ export type PieProps = {
 /// DoubleDonut component
 ///
 export default function DonutDoubleChart({
-                                           title,
-                                           getColor,
-                                           data,
-                                           unit,
-                                           tooltipOuter,
-                                           style,
-                                         }: Props): ReactElement {
-  const {totalSum, outerPieData, innerPieData} = extractDonutData(data)
+  title,
+  getColor,
+  data,
+  unit,
+  tooltipOuter,
+  style,
+}: Props): ReactElement {
+
+  const { totalSum, outerPieData, innerPieData } = extractDonutData(data)
 
   return (
     <Wrapper style={style}>
       <ParentSize>
-        {({width, height}) => (
+        {({ width, height }) => (
           <Graph
             totalSum={totalSum}
             outerPieData={outerPieData}
@@ -171,18 +183,18 @@ type GraphProps = {
 }
 
 function Graph({
-                 title,
-                 width,
-                 height,
-                 unit,
-                 getColor,
-                 margin = defaultMargin,
-                 animate,
-                 outerPieData,
-                 innerPieData,
-                 totalSum,
-                 tooltipOuter,
-               }: GraphProps) {
+  title,
+  width,
+  height,
+  unit,
+  getColor,
+  margin = defaultMargin,
+  animate,
+  outerPieData,
+  innerPieData,
+  totalSum,
+  tooltipOuter,
+}: GraphProps) {
   const {
     tooltipData,
     tooltipOpen,
@@ -198,7 +210,7 @@ function Graph({
     event: React.TouchEvent<SVGPathElement> | React.MouseEvent<SVGPathElement>,
     data: [string, number]
   ) => {
-    const {x, y} = localPoint(event) || {x: 0, y: 0}
+    const { x, y } = localPoint(event) || { x: 0, y: 0 }
 
     showTooltip({
       tooltipData: data,
@@ -221,7 +233,7 @@ function Graph({
   return (
     <>
       <svg width={'100%'} height={height}>
-        <rect x={0} y={0} width={width} height={height} fill="#fff"/>
+        <rect x={0} y={0} width={width} height={height} fill="#fff" />
         {title ? (
           <text
             x="50%"
@@ -284,7 +296,7 @@ function Graph({
           y={height / 2 - 5 + diff / 2}
           dominantBaseline="middle"
           textAnchor="middle"
-          style={{font: 'bold 1.9em sans-serif'}}
+          style={{ font: 'bold 1.9em sans-serif' }}
           fill="#000"
           fillOpacity={0.8}
         >
@@ -326,7 +338,7 @@ function Graph({
             tooltipOuter(tooltipData[0], tooltipData[1], 0.1)
           ) : (
             <>
-              <p style={{textTransform: 'capitalize', fontWeight: 550}}>
+              <p style={{ textTransform: 'capitalize', fontWeight: 550 }}>
                 {tooltipData[0]}
               </p>
               <p>
@@ -344,14 +356,14 @@ function Graph({
 // react-spring transition definitions
 type AnimatedStyles = { startAngle: number; endAngle: number; opacity: number }
 
-const fromLeaveTransition = ({endAngle}: PieArcDatum<any>) => ({
+const fromLeaveTransition = ({ endAngle }: PieArcDatum<any>) => ({
   // enter from 360° if end angle is > 180°
   startAngle: endAngle > Math.PI ? 2 * Math.PI : 0,
   endAngle: endAngle > Math.PI ? 2 * Math.PI : 0,
   opacity: 0,
 })
 
-const enterUpdateTransition = ({startAngle, endAngle}: PieArcDatum<any>) => ({
+const enterUpdateTransition = ({ startAngle, endAngle }: PieArcDatum<any>) => ({
   startAngle,
   endAngle,
   opacity: 1,
@@ -370,14 +382,14 @@ type AnimatedPieProps<Datum> = ProvidedProps<Datum> & {
 }
 
 function AnimatedPie<Datum>({
-                              animate,
-                              arcs,
-                              path,
-                              getKey,
-                              getColor,
-                              handleTooltip,
-                              hideTooltip,
-                            }: AnimatedPieProps<Datum>) {
+  animate,
+  arcs,
+  path,
+  getKey,
+  getColor,
+  handleTooltip,
+  hideTooltip,
+}: AnimatedPieProps<Datum>) {
   const transitions = useTransition<PieArcDatum<Datum>, AnimatedStyles>(
     arcs,
     getKey,
@@ -393,10 +405,10 @@ function AnimatedPie<Datum>({
     <>
       {transitions.map(
         ({
-           item: arc,
-           props,
-           key,
-         }: {
+          item: arc,
+          props,
+          key,
+        }: {
           item: PieArcDatum<Datum>
           props: AnimatedStyles
           key: string

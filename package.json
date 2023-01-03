@@ -1,0 +1,59 @@
+{
+  "name": "bchart",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "peerDependencies": {
+    "react": "17.x || 18.x",
+    "react-dom": "17.x || 18.x"
+  },
+  "dependencies": {
+    "@babel/core": "^7.20.7",
+    "@emotion/eslint-plugin": "^11.7.0",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "11.8.1",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@visx/axis": "^2.6.0",
+    "@visx/curve": "^2.1.0",
+    "@visx/event": "^2.6.0",
+    "@visx/geo": "^2.1.2",
+    "@visx/gradient": "^2.1.0",
+    "@visx/grid": "^2.6.0",
+    "@visx/group": "^2.1.0",
+    "@visx/mock-data": "^2.1.2",
+    "@visx/responsive": "^2.8.0",
+    "@visx/scale": "^2.2.2",
+    "@visx/shape": "^2.4.0",
+    "@visx/text": "^2.3.0",
+    "@visx/tooltip": "^2.8.0",
+    "d3-array": "^3.1.5",
+    "dayjs": "^1.11.0",
+    "eslint": "^8.31.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-spring": "^8.0.27"
+  },
+  "devDependencies": {
+    "@types/d3-array": "^3.0.2",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.9",
+    "@vitejs/plugin-react": "^3.0.0",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.0",
+    "vite-plugin-dts": "^1.7.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/bchart.umd.js",
+  "module": "./dist/bchart.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/bchart.es.js",
+      "require": "./dist/bchart.umd.js"
+    }
+  }
+}
