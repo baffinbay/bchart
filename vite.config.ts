@@ -13,9 +13,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: path.resolve(__dirname, 'index.ts'),
-      name: 'bchart',
+      name: '@bbn/bchart',
       formats: ['es', 'umd'],
-      fileName: (format) => `bchart.${format}.js`,
+      fileName: (format) => `@bbn/bchart.${format}.js`,
     },
     rollupOptions: {
       external: ['react', 'react-dom'],

@@ -1,9 +1,9 @@
 {
-  "name": "bchart",
+  "name": "@bbn/bchart",
   "version": "0.0.1",
+  "author": "Baffin Bay Networks",
   "scripts": {
-    "build": "tsc && vite build",
-    "prepack": "json -f package.json -I -e \"delete this.devDependencies; delete this.dependencies\""
+    "build": "tsc && vite build"
   },
   "peerDependencies": {
     "react": "17.x || 18.x",
