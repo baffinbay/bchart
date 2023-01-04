@@ -40,7 +40,7 @@ const sumByOuterMapKeys = (
 const mapToArrayOfEntries = (x: Map<string, number>): [string, number][] =>
   Array.from(x.entries())
 
-export function merge(
+function merge(
   mapOne: Map<string, number>,
   mapTwo: Map<string, number>
 ): Map<string, number> {
@@ -122,14 +122,6 @@ const extractDonutData = (
       innerPieData: sumByInnerMapKeys(doubleDonutData),
     }
   }
-}
-
-export type PieProps = {
-  width: number
-  height: number
-  title?: string
-  margin?: typeof defaultMargin
-  animate?: boolean
 }
 
 ///
